@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>atlystype — typing speed test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f5f1ea;
+    --bg-elev: #fbf8f2;
+    --ink: #0b1f3a;
+    --ink-soft: #1c2a44;
+    --muted: #8a8273;
+    --muted-soft: #c9c0ad;
+    --line: #e6dfd0;
+    --accent: #0b1f3a;
+    --accent-hover: #142d54;
+    --correct: #0b1f3a;
+    --wrong: #c1361f;
+    --wrong-bg: #f4dcd5;
+    --cursor: #d97742;
+    --pill: #ece6d6;
+    --pill-active: #0b1f3a;
+    --pill-active-text: #fbf8f2;
+    --bg-grad-1: rgba(217, 119, 66, 0.06);
+    --bg-grad-2: rgba(11, 31, 58, 0.05);
+    --radius: 14px;
+    --radius-sm: 10px;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0d1424;
+    --bg-elev: #16203a;
+    --ink: #f0e7d4;
+    --ink-soft: #d6cdb8;
+    --muted: #7a8499;
+    --muted-soft: #3a4561;
+    --line: #1f2a44;
+    --accent: #f0e7d4;
+    --accent-hover: #ffffff;
+    --correct: #f0e7d4;
+    --wrong: #e57461;
+    --wrong-bg: #3a1f1c;
+    --cursor: #e88a52;
+    --pill: #1c2640;
+    --pill-active: #f0e7d4;
+    --pill-active-text: #0d1424;
+    --bg-grad-1: rgba(232, 138, 82, 0.10);
+    --bg-grad-2: rgba(240, 231, 212, 0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 28px 48px;
+    background-image:
+      radial-gradient(circle at 18% 12%, var(--bg-grad-1), transparent 40%),
+      radial-gradient(circle at 92% 88%, var(--bg-grad-2), transparent 45%);
+  }
+
+  /* ───────── Header ───────── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .brand-logo {
+    height: 38px;
+    width: auto;
+    display: block;
+    transition: filter 0.3s ease;
+  }
+  [data-theme="dark"] .brand-logo {
+    /* invert the dark "atlys" wordmark + blue underline against the dark background */
+    filter: invert(1) hue-rotate(180deg) brightness(1.05);
+  }
+  .brand-tagline {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 400;
+    padding-left: 14px;
+    border-left: 1px solid var(--line);
+    letter-spacing: -0.005em;
+  }
+  @media (max-width: 720px) {
+    .brand-tagline { display: none; }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .icon-btn:hover {
+    background: var(--bg-elev);
+    border-color: var(--muted-soft);
+  }
+  .icon-btn.active {
+    background: var(--ink);
+    color: var(--bg-elev);
+    border-color: var(--ink);
+  }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  /* ───────── Mode bar ───────── */
+  .mode-bar {
+    margin: 56px auto 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    padding: 8px;
+    border-radius: 999px;
+    width: max-content;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .mode-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .mode-divider {
+    width: 1px;
+    height: 22px;
+    background: var(--line);
+  }
+  .pill {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s, background 0.15s;
+    letter-spacing: -0.005em;
+  }
+  .pill:hover { color: var(--ink); }
+  .pill.active {
+    background: var(--pill-active);
+    color: var(--pill-active-text);
+  }
+  .pill svg { width: 14px; height: 14px; }
+
+  /* ───────── Words display ───────── */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 0;
+    gap: 24px;
+  }
+
+  .stat-strip {
+    color: var(--cursor);
+    font-size: 28px;
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 36px;
+    letter-spacing: -0.01em;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .stat-strip.visible { opacity: 1; }
+
+  .words-wrapper {
+    width: min(1100px, 100%);
+    position: relative;
+    overflow: hidden;
+    height: calc(30px * 1.55 * 3);
+  }
+  .words {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 30px;
+    line-height: 1.55;
+    color: var(--muted-soft);
+    letter-spacing: -0.005em;
+    word-spacing: 4px;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: filter 0.25s ease, transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  .words.blurred {
+    filter: blur(5px);
+  }
+  .focus-hint {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    pointer-events: none;
+    transition: opacity 0.25s, height 0.25s;
+    letter-spacing: 0;
+    text-align: center;
+    overflow: hidden;
+  }
+  .focus-hint.visible { opacity: 1 !important; height: 24px !important; }
+  .focus-hint svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 6px; }
+
+  .word { display: inline-block; margin: 0 6px 0 0; white-space: nowrap; }
+  .letter { position: relative; transition: color 0.06s; }
+  .letter.correct { color: var(--correct); }
+  .letter.wrong { color: var(--wrong); }
+  .letter.wrong-extra { color: var(--wrong); opacity: 0.75; }
+
+  .caret {
+    position: absolute;
+    width: 2px;
+    background: var(--cursor);
+    border-radius: 2px;
+    transition: left 0.07s cubic-bezier(0.4, 0, 0.2, 1), top 0.07s, height 0.07s;
+    pointer-events: none;
+    animation: blink 1.05s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 45% { opacity: 1; }
+    50%, 95% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .caret.typing { animation: none; opacity: 1; }
+
+  /* ───────── Restart row ───────── */
+  .restart-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+  }
+  .restart-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 10px;
+    transition: color 0.15s, background 0.15s, transform 0.2s;
+  }
+  .restart-btn:hover { color: var(--ink); background: var(--bg-elev); }
+  .restart-btn:active { transform: rotate(-90deg); }
+  .restart-btn svg { width: 22px; height: 22px; }
+
+  /* ───────── Results overlay ───────── */
+  .results {
+    display: none;
+    width: min(1100px, 100%);
+    margin: 0 auto;
+  }
+  .results.visible { display: block; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 40px 56px;
+    align-items: center;
+  }
+  .big-stat .label {
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+    text-transform: lowercase;
+    margin-bottom: 4px;
+  }
+  .big-stat .value {
+    font-size: 90px;
+    font-weight: 600;
+    color: var(--cursor);
+    line-height: 1;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.04em;
+  }
+  .big-stat .sub {
+    font-size: 24px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .small-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+  }
+  .stat .label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    margin-bottom: 2px;
+  }
+  .stat .value {
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+  }
+  .stat .value .unit { font-size: 14px; color: var(--muted); margin-left: 4px; font-weight: 400; }
+
+  .results-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 40px;
+  }
+  .btn {
+    background: var(--ink);
+    color: var(--bg-elev);
+    border: none;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:active { transform: scale(0.98); }
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn.ghost:hover { background: var(--bg-elev); border-color: var(--muted-soft); }
+  .btn svg { width: 14px; height: 14px; }
+
+  /* ───────── Footer ───────── */
+  footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .keyhint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  kbd {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+
+  .hidden-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 1px;
+    height: 1px;
+    left: -9999px;
+  }
+
+  @media (max-width: 720px) {
+    body { padding: 18px 18px; }
+    .words-wrapper { height: calc(22px * 1.55 * 3); }
+    .words { font-size: 22px; }
+    .mode-bar { gap: 6px; padding: 6px; }
+    .pill { padding: 7px 12px; font-size: 13px; }
+    .big-stat .value { font-size: 64px; }
+    .results-grid { grid-template-columns: 1fr; gap: 24px; }
+    .small-stats { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    footer { font-size: 11px; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="#" aria-label="atlystype home">
+      <img src="atlys-logo.png" alt="atlys" class="brand-logo" />
+      <span class="brand-tagline">type fast, travel faster</span>
+    </a>
+    <div class="header-actions">
+      <button class="icon-btn" id="soundToggle" title="Toggle keyboard sounds" aria-label="Toggle keyboard sounds">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+        <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="mode-bar" id="modeBar">
+    <div class="mode-group">
+      <button class="pill" data-toggle="punctuation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="19" r="1"/><path d="M12 4v10"/></svg>
+        punctuation
+      </button>
+      <button class="pill" data-toggle="numbers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg>
+        numbers
+      </button>
+    </div>
+    <div class="mode-divider"></div>
+    <div class="mode-group">
+      <button class="pill active" data-mode="time">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        time
+      </button>
+      <button class="pill" data-mode="words">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h16"/></svg>
+        words
+      </button>
+    </div>
+    <div class="mode-divider"></div>
+    <div class="mode-group" id="amountGroup"></div>
+  </nav>
+
+  <main>
+    <div class="stat-strip" id="liveStat">0</div>
+
+    <div class="words-wrapper" id="wordsWrapper">
+      <div class="words" id="words" tabindex="0"></div>
+    </div>
+    <div class="focus-hint" id="focusHint" style="position:static; height:0; opacity:0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7v10a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4z"/><path d="M9 12h6M12 9v6"/></svg>
+      click here or start typing to focus
+    </div>
+
+    <div class="restart-row">
+      <button class="restart-btn" id="restartBtn" title="Restart (tab + enter)" aria-label="Restart test">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 3-6.7"/>
+          <path d="M3 4v5h5"/>
+        </svg>
+      </button>
+    </div>
+
+    <section class="results" id="results" aria-live="polite">
+      <div class="results-grid">
+        <div class="big-stat">
+          <div class="label">wpm</div>
+          <div class="value" id="resWpm">0</div>
+          <div class="sub" id="resAcc">100% accuracy</div>
+        </div>
+        <div class="small-stats">
+          <div class="stat"><div class="label">raw</div><div class="value" id="resRaw">0</div></div>
+          <div class="stat"><div class="label">characters</div><div class="value" id="resChars">0 / 0 / 0 / 0</div></div>
+          <div class="stat"><div class="label">consistency</div><div class="value" id="resCon">0<span class="unit">%</span></div></div>
+          <div class="stat"><div class="label">time</div><div class="value" id="resTime">0<span class="unit">s</span></div></div>
+        </div>
+      </div>
+      <div class="results-actions">
+        <button class="btn" id="againBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          next test
+        </button>
+        <button class="btn ghost" id="newTextBtn">new text</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="display:flex; gap:18px; flex-wrap:wrap;">
+      <span class="keyhint"><kbd>tab</kbd> <kbd>enter</kbd> restart</span>
+      <span class="keyhint"><kbd>esc</kbd> reset</span>
+    </div>
+    <div>atlystype · mechanical keys, real letters</div>
+  </footer>
+
+  <input class="hidden-input" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   word bank
+───────────────────────────────────────────────────────────── */
+const COMMON = ("the be of and a to in he have it that for they i with as not on she at by this we you do but from or which one would all will there say who make when can more if no man out other so what time up go about than into could state only new year some take come these know see use get like then first any work now may such give over think most even find day also after way many must look before great back through long where much should well people down own just because good each those feel seem how high too place little world very still nation hand old life tell write become here show house both since service let world long under being problem company become turn last home much make right since play place against general high act own course again few become end face fact young government different number small large area family give head life house most word important course another move state hand thing public after week feel new write head become here home around different fact long").split(/\s+/);
+
+const PUNCT_END = [".", ".", ".", ",", ",", "?", "!", ";", ":"];
+const QUOTABLE = ["'", "\""];
+
+function pickWord() { return COMMON[Math.floor(Math.random() * COMMON.length)]; }
+
+function generateWords(count, { punctuation = false, numbers = false } = {}) {
+  const out = [];
+  let capitalize = punctuation;
+  for (let i = 0; i < count; i++) {
+    let w;
+    if (numbers && Math.random() < 0.13) {
+      const len = 1 + Math.floor(Math.random() * 4);
+      let n = "";
+      for (let k = 0; k < len; k++) n += Math.floor(Math.random() * 10);
+      w = n;
+    } else {
+      w = pickWord();
+      if (capitalize) { w = w[0].toUpperCase() + w.slice(1); capitalize = false; }
+      if (punctuation && Math.random() < 0.18 && i < count - 1) {
+        const p = PUNCT_END[Math.floor(Math.random() * PUNCT_END.length)];
+        w += p;
+        if (".!?".includes(p)) capitalize = true;
+      }
+      if (punctuation && Math.random() < 0.05) {
+        const q = QUOTABLE[Math.floor(Math.random() * QUOTABLE.length)];
+        w = q + w + q;
+      }
+    }
+    out.push(w);
+  }
+  if (punctuation && out.length) {
+    const last = out[out.length - 1];
+    if (!/[.!?]$/.test(last)) out[out.length - 1] = last.replace(/[,;:]?$/, "") + ".";
+  }
+  return out;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Mechanical keyboard sound — Web Audio synthesis
+   Layered model:
+     1) Click attack    — short high-freq noise burst through bandpass
+     2) Tactile snap    — mid-freq pop (square -> filter) — the "click"
+     3) Case thock      — low resonant triangle through lowpass
+     4) Decay tail      — feedback delay = subtle "in the case" reverb
+   Each layer randomized in pitch / level / pan, so no two keys sound identical.
+─────────────────────────────────────────────────────────────── */
+const KeySounds = (() => {
+  let ctx = null;
+  let masterGain = null;
+  let bus = null;              // pre-master bus (where everything sums)
+  let reverbReturn = null;     // wet return from feedback delay
+  let noiseBuffer = null;
+  let enabled = true;
+  let lastPlayedAt = 0;        // for throttling
+
+  function ensureCtx() {
+    if (ctx) return ctx;
+    try {
+      const Ctor = window.AudioContext || window.webkitAudioContext;
+      if (!Ctor) { enabled = false; return null; }
+      ctx = new Ctor();
+      masterGain = ctx.createGain();
+      masterGain.gain.value = 0.7;
+      masterGain.connect(ctx.destination);
+
+      bus = ctx.createGain();
+      bus.gain.value = 1;
+      bus.connect(masterGain);
+
+      // simple "case reverb" via short feedback delay
+      const delay = ctx.createDelay(0.25);
+      delay.delayTime.value = 0.035;
+      const fb = ctx.createGain();
+      fb.gain.value = 0.22;
+      const tone = ctx.createBiquadFilter();
+      tone.type = "lowpass";
+      tone.frequency.value = 2500;
+      reverbReturn = ctx.createGain();
+      reverbReturn.gain.value = 0.18;
+      // bus → delay → tone → return → master; return also feeds back into delay
+      bus.connect(delay);
+      delay.connect(tone);
+      tone.connect(reverbReturn);
+      reverbReturn.connect(masterGain);
+      tone.connect(fb);
+      fb.connect(delay);
+
+      // pre-generate stereo noise buffer
+      const len = Math.floor(ctx.sampleRate * 0.2);
+      noiseBuffer = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (let ch = 0; ch < 2; ch++) {
+        const d = noiseBuffer.getChannelData(ch);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1);
+      }
+    } catch (e) {
+      console.warn("[KeySounds] AudioContext init failed:", e);
+      enabled = false;
+      ctx = null;
+    }
+    return ctx;
+  }
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+
+  function makePanner() {
+    if (typeof ctx.createStereoPanner === "function") {
+      const p = ctx.createStereoPanner();
+      p.pan.value = rand(-0.35, 0.35);
+      return p;
+    }
+    return ctx.createGain(); // fallback: no panning
+  }
+
+  // Layer 1 — click attack
+  function clickLayer(when, { freq = 3200, q = 1.2, gain = 0.55, dur = 0.014 }) {
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuffer;
+    src.playbackRate.value = rand(0.85, 1.15);
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass"; hp.frequency.value = 1500;
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass"; bp.frequency.value = freq; bp.Q.value = q;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, when);
+    g.gain.linearRampToValueAtTime(gain, when + 0.0008);
+    g.gain.exponentialRampToValueAtTime(0.0008, when + dur);
+    const pan = makePanner();
+    src.connect(hp); hp.connect(bp); bp.connect(g); g.connect(pan); pan.connect(bus);
+    src.start(when); src.stop(when + dur + 0.02);
+  }
+
+  // Layer 2 — tactile snap (the "click" that gives mech keys their voice)
+  function snapLayer(when, { freq = 900, gain = 0.32, dur = 0.022 }) {
+    const osc = ctx.createOscillator();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(freq * rand(0.95, 1.05), when);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.6, when + dur);
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = 3800; lp.Q.value = 0.7;
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass"; hp.frequency.value = 400;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, when);
+    g.gain.linearRampToValueAtTime(gain, when + 0.0015);
+    g.gain.exponentialRampToValueAtTime(0.001, when + dur);
+    const pan = makePanner();
+    osc.connect(lp); lp.connect(hp); hp.connect(g); g.connect(pan); pan.connect(bus);
+    osc.start(when); osc.stop(when + dur + 0.02);
+  }
+
+  // Layer 3 — case thock (the resonant body)
+  function thockLayer(when, { freq = 180, gain = 0.6, dur = 0.09 }) {
+    const f = freq * rand(0.93, 1.07);
+    // two slightly detuned triangles → fatter body
+    const oscA = ctx.createOscillator();
+    oscA.type = "triangle";
+    oscA.frequency.setValueAtTime(f * 2.1, when);
+    oscA.frequency.exponentialRampToValueAtTime(f, when + 0.008);
+    oscA.frequency.exponentialRampToValueAtTime(f * 0.78, when + dur);
+
+    const oscB = ctx.createOscillator();
+    oscB.type = "sine";
+    oscB.frequency.setValueAtTime(f * 1.02, when);
+    oscB.frequency.exponentialRampToValueAtTime(f * 0.75, when + dur);
+
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = 1400; lp.Q.value = 1.1;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, when);
+    g.gain.linearRampToValueAtTime(gain, when + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0008, when + dur);
+    const pan = makePanner();
+    oscA.connect(lp); oscB.connect(lp); lp.connect(g); g.connect(pan); pan.connect(bus);
+    oscA.start(when); oscB.start(when); oscA.stop(when + dur + 0.04); oscB.stop(when + dur + 0.04);
+  }
+
+  function playKey({ thockFreq, snapFreq, clickFreq, levels = {} } = {}) {
+    if (!enabled) return;
+    const c = ensureCtx();
+    if (!c) return;
+    try {
+      if (c.state === "suspended") c.resume();
+      const now = c.currentTime;
+
+      // throttle insanely fast repeated triggers (>1500/s) just to keep mixer sane
+      if (now - lastPlayedAt < 0.005) return;
+      lastPlayedAt = now;
+
+      clickLayer(now, {
+        freq: (clickFreq || 3200) * rand(0.9, 1.12),
+        gain: (levels.click ?? 0.5) * rand(0.85, 1.05),
+        dur: rand(0.011, 0.018),
+      });
+      snapLayer(now + 0.001, {
+        freq: (snapFreq || 880) * rand(0.92, 1.08),
+        gain: (levels.snap ?? 0.28) * rand(0.85, 1.05),
+        dur: rand(0.018, 0.028),
+      });
+      thockLayer(now + 0.003, {
+        freq: (thockFreq || 175) * rand(0.94, 1.06),
+        gain: (levels.thock ?? 0.6) * rand(0.85, 1.05),
+        dur: rand(0.08, 0.11),
+      });
+    } catch (e) {
+      console.warn("[KeySounds] playKey failed:", e);
+    }
+  }
+
+  return {
+    primeOnUserGesture() {
+      const c = ensureCtx();
+      if (c && c.state === "suspended") c.resume().catch(() => {});
+    },
+    setEnabled(v) { enabled = !!v; },
+    isEnabled() { return enabled; },
+
+    // Per-key voices — tuned to feel like a tactile mech (think Holy Pandas in a heavy case)
+    letter()    { playKey({ thockFreq: 175, snapFreq: 920,  clickFreq: 3200 }); },
+    space()     { playKey({ thockFreq: 105, snapFreq: 560,  clickFreq: 2200, levels: { click: 0.42, snap: 0.34, thock: 0.85 } }); },
+    enter()     { playKey({ thockFreq: 130, snapFreq: 720,  clickFreq: 2600, levels: { click: 0.45, snap: 0.3,  thock: 0.78 } }); },
+    backspace() { playKey({ thockFreq: 200, snapFreq: 1100, clickFreq: 3600, levels: { click: 0.4,  snap: 0.22, thock: 0.5  } }); },
+    modifier()  { playKey({ thockFreq: 150, snapFreq: 780,  clickFreq: 2400, levels: { click: 0.35, snap: 0.22, thock: 0.55 } }); },
+    error() {
+      if (!enabled) return;
+      const c = ensureCtx(); if (!c) return;
+      try {
+        const now = c.currentTime;
+        const osc = c.createOscillator();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(85, now + 0.09);
+        const f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 700;
+        const g = c.createGain();
+        g.gain.setValueAtTime(0.14, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(f); f.connect(g); g.connect(bus);
+        osc.start(now); osc.stop(now + 0.12);
+      } catch (e) { /* noop */ }
+    },
+  };
+})();
+
+/* ─────────────────────────────────────────────────────────────
+   State + DOM
+───────────────────────────────────────────────────────────── */
+const $ = (s) => document.querySelector(s);
+const wordsEl = $("#words");
+const wordsWrap = $("#wordsWrapper");
+const focusHint = $("#focusHint");
+const hiddenInput = $("#hiddenInput");
+const liveStat = $("#liveStat");
+const resultsEl = $("#results");
+const modeBar = $("#modeBar");
+const amountGroup = $("#amountGroup");
+const restartBtn = $("#restartBtn");
+const soundToggle = $("#soundToggle");
+
+if (!wordsEl || !wordsWrap || !hiddenInput) {
+  console.error("[atlystype] required DOM elements missing — page won't function");
+}
+
+const AMOUNTS = { time: [15, 30, 60, 120], words: [10, 25, 50, 100] };
+
+const state = {
+  mode: "time",
+  amount: 30,
+  punctuation: false,
+  numbers: false,
+  words: [],            // array of strings
+  typed: [],            // parallel array of typed strings
+  wordIdx: 0,
+  charIdx: 0,
+  started: false,
+  finished: false,
+  startTime: 0,
+  endTime: 0,
+  timerHandle: null,
+  liveTimer: null,
+  wpmSamples: [],       // per-second wpm samples for consistency
+  correctChars: 0,
+  incorrectChars: 0,
+  extraChars: 0,
+  missedChars: 0,
+};
+
+let caret;
+let tabHeldAt = 0;
+
+/* ─────────── render ─────────── */
+function buildAmountButtons() {
+  amountGroup.innerHTML = "";
+  AMOUNTS[state.mode].forEach((n) => {
+    const b = document.createElement("button");
+    b.className = "pill" + (n === state.amount ? " active" : "");
+    b.textContent = n;
+    b.dataset.amount = n;
+    b.addEventListener("click", () => {
+      state.amount = n;
+      buildAmountButtons();
+      restart();
+    });
+    amountGroup.appendChild(b);
+  });
+}
+
+function renderWords() {
+  wordsEl.innerHTML = "";
+  wordsEl.style.transform = "translateY(0)";
+  state.words.forEach((w, wi) => {
+    const wEl = document.createElement("span");
+    wEl.className = "word";
+    wEl.dataset.idx = wi;
+    for (let ci = 0; ci < w.length; ci++) {
+      const l = document.createElement("span");
+      l.className = "letter";
+      l.textContent = w[ci];
+      wEl.appendChild(l);
+    }
+    wordsEl.appendChild(wEl);
+  });
+  caret = document.createElement("div");
+  caret.className = "caret";
+  wordsEl.appendChild(caret);
+  // wait for layout, then place caret and align row
+  requestAnimationFrame(() => { placeCaret(); scrollToActive(); });
+}
+
+function getLineHeight() {
+  const lh = parseFloat(getComputedStyle(wordsEl).lineHeight);
+  return isFinite(lh) && lh > 0 ? lh : 46;
+}
+
+function placeCaret() {
+  try {
+    const wordEls = wordsEl.querySelectorAll(".word");
+    const wEl = wordEls[state.wordIdx];
+    if (!wEl || !caret) return;
+    const letters = wEl.querySelectorAll(".letter");
+    let rect;
+    if (state.charIdx < letters.length) {
+      rect = letters[state.charIdx].getBoundingClientRect();
+    } else if (letters.length) {
+      const r = letters[letters.length - 1].getBoundingClientRect();
+      rect = { left: r.right, top: r.top, height: r.height };
+    } else {
+      rect = wEl.getBoundingClientRect();
+    }
+    const wrap = wordsEl.getBoundingClientRect();
+    caret.style.left = (rect.left - wrap.left - 1) + "px";
+    caret.style.top = (rect.top - wrap.top) + "px";
+    caret.style.height = rect.height + "px";
+    caret.classList.add("typing");
+    clearTimeout(placeCaret._t);
+    placeCaret._t = setTimeout(() => caret && caret.classList.remove("typing"), 140);
+  } catch (e) {
+    console.warn("[atlystype] placeCaret failed:", e);
+  }
+}
+
+/* Smoothly slide the .words element up so the active word sits on the 2nd visible
+   row. Words are never removed — they stay rendered, just clipped by the wrapper's
+   overflow:hidden. This is what kills the "text disappears out of nowhere" bug. */
+function scrollToActive() {
+  try {
+    const wordEls = wordsEl.querySelectorAll(".word");
+    const wEl = wordEls[state.wordIdx];
+    if (!wEl) return;
+    const lineH = getLineHeight();
+    // active word's row index *within the .words element's own coordinate space*
+    const activeTopWithinWords = wEl.offsetTop;
+    const activeRow = Math.round(activeTopWithinWords / lineH);
+    // keep active row on the middle line (index 1)
+    const targetRow = Math.max(0, activeRow - 1);
+    wordsEl.style.transform = `translateY(${-targetRow * lineH}px)`;
+    // caret needs to be repositioned after the transform settles
+    requestAnimationFrame(placeCaret);
+  } catch (e) {
+    console.warn("[atlystype] scrollToActive failed:", e);
+  }
+}
+
+/* ─────────── input handling ─────────── */
+function startIfNeeded() {
+  if (state.started || state.finished) return;
+  state.started = true;
+  state.startTime = performance.now();
+  liveStat.classList.add("visible");
+  KeySounds.primeOnUserGesture();
+
+  if (state.mode === "time") {
+    let remaining = state.amount;
+    liveStat.textContent = remaining;
+    state.timerHandle = setInterval(() => {
+      remaining--;
+      liveStat.textContent = Math.max(0, remaining);
+      sampleWpm();
+      if (remaining <= 0) finish();
+    }, 1000);
+  } else {
+    liveStat.textContent = `0 / ${state.amount}`;
+    state.timerHandle = setInterval(sampleWpm, 1000);
+  }
+}
+
+function sampleWpm() {
+  const elapsed = (performance.now() - state.startTime) / 1000;
+  if (elapsed <= 0) return;
+  const wpm = (state.correctChars / 5) / (elapsed / 60);
+  state.wpmSamples.push(wpm);
+}
+
+function onKey(e) {
+  try {
+    if (state.finished && !(e.key === "Tab" || e.key === "Enter" || e.key === "Escape")) return;
+
+    // Restart via tab+enter
+    if (e.key === "Tab") {
+      e.preventDefault();
+      tabHeldAt = Date.now();
+      KeySounds.modifier();
+      return;
+    }
+    if (e.key === "Enter" && Date.now() - tabHeldAt < 800) {
+      e.preventDefault();
+      KeySounds.enter();
+      restart();
+      return;
+    }
+    if (e.key === "Escape") { e.preventDefault(); KeySounds.modifier(); restart(); return; }
+
+    if (state.finished) return;
+
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      handleBackspace(e.ctrlKey || e.metaKey);
+      KeySounds.backspace();
+      return;
+    }
+
+    if (e.key === " ") {
+      e.preventDefault();
+      handleSpace();
+      KeySounds.space();
+      return;
+    }
+
+    // printable single char
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      handleChar(e.key);
+      KeySounds.letter();
+    }
+  } catch (err) {
+    console.warn("[atlystype] onKey failed:", err);
+  }
+}
+
+function handleChar(ch) {
+  startIfNeeded();
+  const word = state.words[state.wordIdx];
+  if (state.charIdx < word.length) {
+    const letterEl = wordsEl.querySelectorAll(".word")[state.wordIdx].children[state.charIdx];
+    if (ch === word[state.charIdx]) {
+      letterEl.classList.add("correct");
+      state.correctChars++;
+    } else {
+      letterEl.classList.add("wrong");
+      letterEl.textContent = word[state.charIdx]; // keep target visible
+      state.incorrectChars++;
+      KeySounds.error();
+    }
+    state.typed[state.wordIdx] = (state.typed[state.wordIdx] || "") + ch;
+    state.charIdx++;
+  } else {
+    // extra letter beyond word length
+    const wEl = wordsEl.querySelectorAll(".word")[state.wordIdx];
+    const extra = document.createElement("span");
+    extra.className = "letter wrong-extra";
+    extra.textContent = ch;
+    extra.dataset.extra = "1";
+    wEl.appendChild(extra);
+    state.typed[state.wordIdx] = (state.typed[state.wordIdx] || "") + ch;
+    state.extraChars++;
+    state.charIdx++;
+    KeySounds.error();
+  }
+  placeCaret();
+  scrollToActive();
+}
+
+function handleSpace() {
+  if (!state.started) startIfNeeded();
+  const word = state.words[state.wordIdx];
+  // count missed chars
+  if (state.charIdx < word.length) {
+    state.missedChars += (word.length - state.charIdx);
+  }
+  state.wordIdx++;
+  state.charIdx = 0;
+  if (state.mode === "words") {
+    liveStat.textContent = `${state.wordIdx} / ${state.amount}`;
+    if (state.wordIdx >= state.amount) { finish(); return; }
+  } else {
+    if (state.wordIdx >= state.words.length - 6) {
+      const more = generateWords(20, { punctuation: state.punctuation, numbers: state.numbers });
+      state.words.push(...more);
+      more.forEach(() => state.typed.push(""));
+      appendWords(more);
+    }
+  }
+  placeCaret();
+  scrollToActive();
+}
+
+function appendWords(arr) {
+  arr.forEach((w) => {
+    const wEl = document.createElement("span");
+    wEl.className = "word";
+    for (let ci = 0; ci < w.length; ci++) {
+      const l = document.createElement("span");
+      l.className = "letter";
+      l.textContent = w[ci];
+      wEl.appendChild(l);
+    }
+    wordsEl.insertBefore(wEl, caret);
+  });
+}
+
+function handleBackspace(wholeWord) {
+  if (state.charIdx === 0) {
+    if (state.wordIdx === 0) return;
+    // jump to previous word only if it had errors
+    const prevTyped = state.typed[state.wordIdx - 1] || "";
+    const prevWord = state.words[state.wordIdx - 1];
+    let hadError = prevTyped.length !== prevWord.length;
+    if (!hadError) {
+      const prevEl = wordsEl.querySelectorAll(".word")[state.wordIdx - 1];
+      hadError = !!prevEl.querySelector(".wrong, .wrong-extra");
+    }
+    if (!hadError) return;
+    state.wordIdx--;
+    state.charIdx = state.typed[state.wordIdx].length;
+  }
+  if (wholeWord) {
+    while (state.charIdx > 0) deleteOne();
+  } else {
+    deleteOne();
+  }
+  placeCaret();
+  scrollToActive();
+}
+
+function deleteOne() {
+  if (state.charIdx === 0) return;
+  state.charIdx--;
+  const wEl = wordsEl.querySelectorAll(".word")[state.wordIdx];
+  const word = state.words[state.wordIdx];
+  const typedNow = state.typed[state.wordIdx] || "";
+  const removedCh = typedNow[typedNow.length - 1];
+  state.typed[state.wordIdx] = typedNow.slice(0, -1);
+  // remove letter element accordingly
+  const letterEl = wEl.children[state.charIdx];
+  if (letterEl && letterEl.dataset.extra) {
+    wEl.removeChild(letterEl);
+    state.extraChars = Math.max(0, state.extraChars - 1);
+  } else if (letterEl) {
+    if (letterEl.classList.contains("correct")) state.correctChars = Math.max(0, state.correctChars - 1);
+    if (letterEl.classList.contains("wrong")) state.incorrectChars = Math.max(0, state.incorrectChars - 1);
+    letterEl.classList.remove("correct", "wrong");
+    letterEl.textContent = word[state.charIdx];
+  }
+}
+
+/* ─────────── finish + results ─────────── */
+function finish() {
+  if (state.finished) return;
+  state.finished = true;
+  state.endTime = performance.now();
+  if (state.timerHandle) { clearInterval(state.timerHandle); state.timerHandle = null; }
+  liveStat.classList.remove("visible");
+
+  const seconds = Math.max(0.5, (state.endTime - state.startTime) / 1000);
+  const minutes = seconds / 60;
+  const correct = state.correctChars;
+  const incorrect = state.incorrectChars;
+  const extra = state.extraChars;
+  const missed = state.missedChars;
+
+  const wpm = Math.round((correct / 5) / minutes);
+  const rawWpm = Math.round(((correct + incorrect + extra) / 5) / minutes);
+  const totalTyped = correct + incorrect + extra;
+  const acc = totalTyped === 0 ? 100 : Math.max(0, Math.round((correct / totalTyped) * 100));
+
+  // consistency: 100 - stdev/mean * 100  (clamped)
+  let consistency = 0;
+  if (state.wpmSamples.length >= 2) {
+    const mean = state.wpmSamples.reduce((a, b) => a + b, 0) / state.wpmSamples.length;
+    const variance = state.wpmSamples.reduce((a, b) => a + (b - mean) ** 2, 0) / state.wpmSamples.length;
+    const stdev = Math.sqrt(variance);
+    consistency = Math.max(0, Math.min(100, Math.round(100 - (stdev / Math.max(1, mean)) * 100)));
+  }
+
+  const safe = (n) => (isFinite(n) && n >= 0 ? n : 0);
+  $("#resWpm").textContent = safe(wpm);
+  $("#resAcc").textContent = `${safe(acc)}% accuracy`;
+  $("#resRaw").textContent = safe(rawWpm);
+  $("#resChars").textContent = `${correct} / ${incorrect} / ${extra} / ${missed}`;
+  $("#resCon").innerHTML = `${safe(consistency)}<span class="unit">%</span>`;
+  $("#resTime").innerHTML = `${Math.round(seconds)}<span class="unit">s</span>`;
+
+  wordsEl.classList.add("blurred");
+  resultsEl.classList.add("visible");
+}
+
+/* ─────────── restart ─────────── */
+function restart(newText = true) {
+  if (state.timerHandle) { clearInterval(state.timerHandle); state.timerHandle = null; }
+  state.started = false;
+  state.finished = false;
+  state.wordIdx = 0;
+  state.charIdx = 0;
+  state.startTime = 0;
+  state.endTime = 0;
+  state.wpmSamples = [];
+  state.correctChars = 0;
+  state.incorrectChars = 0;
+  state.extraChars = 0;
+  state.missedChars = 0;
+  liveStat.classList.remove("visible");
+  liveStat.textContent = "";
+  resultsEl.classList.remove("visible");
+  wordsEl.classList.remove("blurred");
+
+  const desired = state.mode === "words" ? state.amount : 60;
+  if (newText || state.words.length === 0) {
+    state.words = generateWords(desired, { punctuation: state.punctuation, numbers: state.numbers });
+    state.typed = state.words.map(() => "");
+  }
+  renderWords();
+  focusHidden();
+}
+
+/* ─────────── focus management ─────────── */
+function focusHidden() {
+  hiddenInput.focus({ preventScroll: true });
+  focusHint.classList.remove("visible");
+}
+wordsEl.addEventListener("click", focusHidden);
+document.addEventListener("click", (e) => {
+  if (e.target.closest(".pill") || e.target.closest(".icon-btn") || e.target.closest("button")) return;
+  focusHidden();
+});
+hiddenInput.addEventListener("blur", () => {
+  if (!state.finished) focusHint.classList.add("visible");
+});
+hiddenInput.addEventListener("focus", () => focusHint.classList.remove("visible"));
+
+document.addEventListener("keydown", (e) => {
+  // make sure hidden input gets the focus when user starts typing
+  if (document.activeElement !== hiddenInput && !e.metaKey && !e.ctrlKey && !e.altKey && e.key.length === 1) {
+    focusHidden();
+  }
+  onKey(e);
+});
+
+/* ─────────── mode-bar handlers ─────────── */
+modeBar.addEventListener("click", (e) => {
+  const pill = e.target.closest(".pill");
+  if (!pill) return;
+  if (pill.dataset.mode) {
+    state.mode = pill.dataset.mode;
+    modeBar.querySelectorAll("[data-mode]").forEach((p) => p.classList.toggle("active", p === pill));
+    state.amount = AMOUNTS[state.mode][1];
+    buildAmountButtons();
+    restart();
+  } else if (pill.dataset.toggle) {
+    state[pill.dataset.toggle] = !state[pill.dataset.toggle];
+    pill.classList.toggle("active", state[pill.dataset.toggle]);
+    restart();
+  }
+});
+
+restartBtn.addEventListener("click", () => restart());
+$("#againBtn").addEventListener("click", () => restart());
+$("#newTextBtn").addEventListener("click", () => restart(true));
+
+soundToggle.addEventListener("click", () => {
+  const next = !KeySounds.isEnabled();
+  KeySounds.setEnabled(next);
+  soundToggle.classList.toggle("active", next);
+  if (next) { KeySounds.primeOnUserGesture(); KeySounds.letter(); }
+});
+soundToggle.classList.add("active"); // sounds on by default
+
+/* ─────────── theme toggle ─────────── */
+const themeBtn = $("#themeBtn");
+const moonIcon = $("#themeIconMoon");
+const sunIcon = $("#themeIconSun");
+
+function applyTheme(theme) {
+  const isDark = theme === "dark";
+  document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+  if (moonIcon) moonIcon.style.display = isDark ? "none" : "";
+  if (sunIcon)  sunIcon.style.display  = isDark ? "" : "none";
+  themeBtn && themeBtn.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
+}
+
+function getStoredTheme() {
+  try { return localStorage.getItem("atlystype-theme"); } catch { return null; }
+}
+function storeTheme(t) {
+  try { localStorage.setItem("atlystype-theme", t); } catch { /* ignore */ }
+}
+
+const initial = getStoredTheme()
+  || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+applyTheme(initial);
+
+themeBtn && themeBtn.addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  applyTheme(next);
+  storeTheme(next);
+});
+
+/* ─────────── reliability layer ─────────── */
+window.addEventListener("resize", () => { placeCaret(); scrollToActive(); });
+
+// Pause the timer while tab is hidden so the test doesn't quietly burn time.
+let pausedAt = 0;
+document.addEventListener("visibilitychange", () => {
+  try {
+    if (document.hidden && state.started && !state.finished) {
+      pausedAt = performance.now();
+      if (state.timerHandle) { clearInterval(state.timerHandle); state.timerHandle = null; }
+    } else if (!document.hidden && state.started && !state.finished && pausedAt) {
+      // shift startTime forward by the hidden duration
+      const offset = performance.now() - pausedAt;
+      state.startTime += offset;
+      pausedAt = 0;
+      // re-arm the live timer
+      if (state.mode === "time") {
+        let remaining = state.amount - Math.floor((performance.now() - state.startTime) / 1000);
+        liveStat.textContent = Math.max(0, remaining);
+        state.timerHandle = setInterval(() => {
+          remaining--;
+          liveStat.textContent = Math.max(0, remaining);
+          sampleWpm();
+          if (remaining <= 0) finish();
+        }, 1000);
+      } else {
+        state.timerHandle = setInterval(sampleWpm, 1000);
+      }
+    }
+  } catch (e) { console.warn("[atlystype] visibility handler failed:", e); }
+});
+
+// last-line defense — never let one stray error blank the UI
+window.addEventListener("error", (e) => {
+  console.warn("[atlystype] uncaught error:", e.message);
+});
+window.addEventListener("unhandledrejection", (e) => {
+  console.warn("[atlystype] unhandled promise rejection:", e.reason);
+});
+
+/* ─────────── go ─────────── */
+try {
+  buildAmountButtons();
+  restart();
+  setTimeout(focusHidden, 50);
+} catch (e) {
+  console.error("[atlystype] init failed:", e);
+}
+</script>
+</body>
+</html>
